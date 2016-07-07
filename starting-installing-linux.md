@@ -28,6 +28,8 @@ Update the package list and install the following dependencies for all PX4 build
 
 ```sh
 sudo add-apt-repository ppa:george-edison55/cmake-3.x -y
+# Currently getting java in Ubuntu does not work. Add this repository
+sudo add-apt-repository ppa:openjdk-r/ppa
 sudo apt-get update
 sudo apt-get install python-argparse git-core wget zip \
     python-empy qtcreator cmake build-essential genromfs -y
@@ -59,6 +61,8 @@ sudo apt-get install python-serial openocd \
 If the resulting `gcc-arm-none-eabi` version produces build errors for PX4/Firmware master, please refer to [the bare metal installation instructions](http://dev.px4.io/starting-installing-linux-boutique.html#toolchain-installation) to install version 4.8 manually.
 
 ### Snapdragon Flight
+Snapdragon Flight Kit uses Linux Linaro OS which is for ARM Architecture Cores.
+To compile PX4 for Snapdragon Flight Kit, Also requires bunch of packages to cross-compile it's ARM core.
 
 #### Toolchain installation
 
@@ -74,7 +78,7 @@ git clone https://github.com/ATLFlight/cross_toolchain.git
 
 Get the Hexagon SDK 3.0 from QDN: https://developer.qualcomm.com/download/hexagon/hexagon-sdk-v3-linux.bin
 
-This will require a QDN login. You will have to register if you do not already have an account.
+This will require a QDN(Qualcomm Developer Network) login. You will have to register if you do not already have an account.
 
 Now move the following files in the download folder of the cross toolchain as follows:
 
@@ -91,7 +95,7 @@ cd cross_toolchain
 cd ..
 ```
 
-Follow the instructions to set up the development environment. If you accept all the install defaults you can at any time re-run the following to get the env setup. It will only install missing components.
+Follow the instructions to set up the development environment. If you accept all the install defaults you can at any time re-run the following to get the environment setup. It will only install missing components.
 
 After this the tools and SDK will have been installed to "$HOME/Qualcomm/...". Append the following to your ~/.bashrc:
 
@@ -113,13 +117,36 @@ source ~/.bashrc
 
 A sysroot is required to provide the libraries and header files needed to cross compile applications for the Snapdragon Flight applications processor.
 
-Currently, the trusty sysroot is used because the provided one by Intrinsyc has miraculously been removed from their download website.
+There are 2 sysroot options. The recommended is QRLinux because it provides access to all the proprietary libraries to access camera(Snapdragon has built in 4K front camera and downfacing optical flow cammera), etc on Snapdragon Flight.
+(To download QRLinux, Requires support account of Intrisyc which asks Snapdragon Flight Kit's product serial)
+
+If you do not have an Intrinsyc account, you can use stock Ubuntu Trusty (14.04) sysroot to build PX4 , but will not have access to the camera headers and libs.
+
+#### QRLinux sysroot
+Login to the Intrisyc support page and download QRLinux for Snapdragon
+http://support.intrinsyc.com/attachments/download/690/Flight_3.1.1_qrlSDK.zip
+
+copy/move the file to the ./download directory
+```
+cp ~/Downloads/Flight_qrlSDK.zip ./downloads
+./qrlinux_sysroot.sh --clean
 
 ```
-cd cross_toolchain
+This will install:
+
+ARMv7hf QRLinux sysroot [HEXAGON_ARM_SYSROOT]: ${HOME}/Qualcomm/qrlinux_v1.0_sysroot
+
+#### Stock Ubuntu Trusty (14.04) sysroot
+
+Create the Ubuntu Trusty (14.04) sysroot
+```
+export HEXAGON_SDK_ROOT=${HOME}/Qualcomm/Hexagon_SDK/3.0
 ./trusty_sysroot.sh
 ```
 
+This will install:
+
+ARMv7hf Ubuntu Trusty (14.04) sysroot [HEXAGON_ARM_SYSROOT]: ${HOME}/Qualcomm/ubuntu_14.04_armv7_sysroot
 Append the following to your ~/.bashrc:
 
 ```
@@ -142,6 +169,8 @@ Before building, flashing and running code, you'll need to update the [ADSP firm
 
 There is a an external set of documentation for Snapdragon Flight toolchain and SW setup and verification:
 [ATLFlightDocs](https://github.com/ATLFlight/ATLFlightDocs/blob/master/README.md)
+And If you have Snapdragon Flight Kit, Refer these documents of
+Basic Guides for User, Developers and How to use cameras, etc : [Intrinsyc Documents](http://support.intrinsyc.com/projects/snapdragon-flight/documents)
 
 Messages from the DSP can be viewed using mini-dm.
 
