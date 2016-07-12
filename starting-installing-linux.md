@@ -110,7 +110,7 @@ Load the new configuration:
 
 
 ```sh
-source ~/.bashrc
+source . ~/.bashrc
 ```
 
 #### Sysroot Installation
